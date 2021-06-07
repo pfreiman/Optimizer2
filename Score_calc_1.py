@@ -2,11 +2,11 @@ from tkinter import *
 from tkinter import ttk
 
 
-import Criteria_list_constants
-import Functions_list
+from CardiologyToolkit import CardiologyToolkit
 
 
 root = Tk()
+my_tools = CardiologyToolkit()
 
 root.title("Data Entry Screen")
 root.geometry('1000x1000')
@@ -16,19 +16,7 @@ upper_frame = Frame(root, width=800, height=300, bd=5, bg="aqua", relief="sunken
 upper_frame.grid(row=1, column=0, columnspan=3, padx=20, pady=30)
 
 
-
-criteria_list = []
-#  criteria_list = ['CHF', 'HTN', 'AGE', 'Diabetes', 'Stroke_hx']  # literal list of criteria list
-#  criteria_list = Criteria_list_constants.cl_CHADS  # pulls in criteria list constant from constants file
-
-#  criteria_list = ['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo','Foxtrot']
-#  criteria_list = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
-
-#  print("Criteria list:", criteria_list)
-
 checkboxes = {}
-response_dict = {}
-result_text = ""
 # global item variable is selected item in combobox
 
 """ First function puts the checkboxes on the GUI screen"""
@@ -63,7 +51,7 @@ def checkboxesclear():
     checkboxes = {}
     return checkboxes
 
-CreateCheckBoxes(criteria_list)
+CreateCheckBoxes(my_tools.get_current_criteria_list())
 
 #  print(checkboxes)  # debug
 
@@ -72,8 +60,6 @@ CreateCheckBoxes(criteria_list)
 
 
 def CreateDictionary():
-    global response_dict
-
     kl = []
     vl = []
     for box in checkboxes:
@@ -86,29 +72,23 @@ def CreateDictionary():
         vl.append(value)
 
         # print("Built lists:", kl, vl)  # debug
-        response_dict = dict(zip(kl, vl))
+        my_tools.response_dict = dict(zip(kl, vl))
 
-    print("Dictionary of responses is:", response_dict)  # debug
-    result_text = "Dictionary of responses is:", response_dict
-    return response_dict
+    print("Dictionary of responses is:", my_tools.response_dict)  # debug
+    my_tools.result_text = "Dictionary of responses is:", my_tools.response_dict
+    return my_tools.response_dict
 
 
 def show_result_in_label():
     a = CreateDictionary()
-    global result_text
     labeltext = str(a)
-    result_text = ("Final entries are", labeltext)
-    result_label = Label(root, text=result_text, font="helvetica, 12", bg='gray', fg='yellow',
+    my_tools.result_text = ("Final entries are", labeltext)
+    result_label = Label(root, text=my_tools.result_text, font="helvetica, 12", bg='gray', fg='yellow',
                          relief='sunken')
 
-    if item == "CHADS score":
-        current_function = Functions_list.CHADS_score_dictionary_method(response_dict)
-    elif item == "CHADS-VASc score":
-        current_function = Functions_list.CHADS_VASc_score_dictionary_method(response_dict)
-    elif item == "Post-code algorithm":
-        current_function = Functions_list.Post_Code_Cath_algorithm(response_dict)
+    my_tools.current_function = my_tools.get_current_score_or_rec_function()
 
-    result_label.config(text=str(result_text) + "\n\n" + item + " is: \n\n" + str(current_function))
+    result_label.config(text=str(my_tools.result_text) + "\n\n" + my_tools.item + " is: \n\n" + str(my_tools.current_function))
        #  result_label.config(text=str(result_text) + "\n\n" + item + " is: \n\n" + str(
         #  Functions_list.CHADS_VASc_score_dictionary_method(response_dict)))
     # print("CF is:", current_function)
@@ -118,20 +98,13 @@ def show_result_in_label():
 
 
 def show_response_text():
-    print("Final result text is:", result_text) # debug to see if variable is global and value is saved
+    print("Final result text is:", my_tools.result_text) # debug to see if variable is global and value is saved
 
 def open_new_window():
 
-    global showtext
+    my_tools.current_function = my_tools.get_current_score_or_rec_function()
 
-    if item == "CHADS score":
-        current_function = Functions_list.CHADS_score_dictionary_method(response_dict)
-    elif item == "CHADS-VASc score":
-        current_function = Functions_list.CHADS_VASc_score_dictionary_method(response_dict)
-    elif item == "Post-code algorithm":
-        current_function = Functions_list.Post_Code_Cath_algorithm(response_dict)
-
-    showtext = str(result_text) + "\n\n" + item + " is:  \n\n" + str(current_function)
+    my_tools.showtext = str(my_tools.result_text) + "\n\n" + my_tools.item + " is:  \n\n" + str(my_tools.current_function)
 
 
     new = Toplevel()
@@ -139,7 +112,7 @@ def open_new_window():
     new.geometry('800x800')
     new.resizable(True, True)
 
-    res_label=Label(new, text="Results appear here:  " + showtext, font=("Helvetica", 16),  bg="yellow")
+    res_label=Label(new, text="Results appear here:  " + my_tools.showtext, font=("Helvetica", 16),  bg="yellow")
     res_label.grid(row=2, column=1, columnspan=3, pady=50)
 
     res_close_button = Button(new, text="Close", command=new.destroy)
@@ -151,7 +124,7 @@ def open_new_window():
     res_more_button = Button(new, text="More")
     res_more_button.grid(row=4, column=1, pady=50)
 
-    print("Show text in new window is:", showtext)
+    print("Show text in new window is:", my_tools.showtext)
 
     new.mainloop()
 
@@ -225,26 +198,10 @@ edit_menu.add_command(label="Paste", command=paste_command)
 
 
 def combocallbackfunc(event):
-
-    global item
-    global current_function
-    item = my_combo.get()
-    print("Combo item is:", item)
-    if item == "CHADS score":
-        criteria_list = Criteria_list_constants.cl_CHADS
-        # current_function = Functions_list.CHADS_score_dictionary_method(response_dict)
-    elif item== "CHADS-VASc score":
-        criteria_list = Criteria_list_constants.cl_CHADS_VASc
-        # current_function = Functions_list.CHADS_VASc_score_dictionary_method(response_dict)
-    elif item == "Post-code algorithm":
-        criteria_list = Criteria_list_constants.cl_post_arrest
-        # current_function = Functions_list.Post_Code_Cath_algorithm(response_dict)
+    my_tools.item = my_combo.get()
+    print("Combo item is:", my_tools.item)
     checkboxesclear()
-    CreateCheckBoxes(criteria_list)
-    #  checkboxesclear()
-
-
-
+    CreateCheckBoxes(my_tools.get_current_criteria_list())
 
 options = [
     "",
