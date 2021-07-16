@@ -8,12 +8,39 @@ class CardiologyToolkit:
     def __init__(self):
         self.item = ""
         self.response_dict = {}
+        self.questions_dict = {}
         self.result_text = ""
-        self.current_function = ""
+        self.result_for_current_function = ""
         self.showtext = ""
+        self.display_text = ""
+        self.display_more_text = ""
+
+        self.set_of_checkbox_questions = set(["CHADS score", "CHADS-VASc score", "Post-code algorithm", "HAS-BLED score"])
+        self.set_of_radiobutton_questions = set(["HEART score"])
+        self.set_of_numerical_input_questions = set()
+
+        self.heart_score_criteria = {
+            'History': ('Slightly suspicious', 'Moderately suspicious', 'Highly suspicious'),
+            'EKG': ('No changes', 'Non-specific repolarization abnormality', 'Significant ST deviation'),
+            'Age': ('<45', '45-64', '>=65'),
+            'Risk factors': ('None', '1-2 risk factors', '>=3 risk factors'),
+            'Troponin': ('Normal', '1-3 x normal', '> 3 x normal')
+        }
+
+        self.combobox_options_list = ["", "CHADS score", "CHADS-VASc score", "Post-code algorithm", "HAS-BLED score",
+                                      "HEART score"]
         self.__cl_CHADS = ['CHF', 'HTN', 'AGE > 75', 'Diabetes', 'Stroke_hx']
         self.__cl_CHADS_VASc = ['CHF', 'HTN', 'AGE > 75', 'Diabetes', 'Stroke_hx', 'Vascular_dz', 'AGE > 65', 'Female_gender']
-        self.__cl_post_arrest = ['Unwitnessed', 'Ongoing CPR', 'ROSC_> 30 minutes', 'pH < 7.2', 'Non-cardiac cause', 'Initial rhythm non-VF', 'lactate > 7', 'No bystander COR', 'Age > 85', 'ESRD']
+        self.__cl_post_arrest = ['Unwitnessed', 'Ongoing CPR', 'ROSC_> 30 minutes', 'pH < 7.2', 'Non-cardiac cause', 'Initial rhythm non-VF', 'lactate > 7', 'No bystander CPR', 'Age > 85', 'ESRD']
+        self.__cl_HAS_BLED = ['HTN', 'Renal dz', 'Liver dz', 'Stroke hx', 'Prior bleeding', 'Labile INR', 'Age > 65', 'High risk meds', 'Alcohol use']
+
+
+
+
+    # def get_list(self):   ## used in radiobuttons program
+    #     current_list = self.__cl_post_arrest
+    #     return current_list
+
 
     def get_current_criteria_list(self):
         combo_item = self.item
@@ -23,24 +50,61 @@ class CardiologyToolkit:
             criteria_list = self.__cl_CHADS_VASc
         elif combo_item == "Post-code algorithm":
             criteria_list = self.__cl_post_arrest
+        elif combo_item == "HAS-BLED score":
+            criteria_list = self.__cl_HAS_BLED
         else:
             criteria_list = []
         return criteria_list
 
-    def get_current_score_or_rec_function(self):
+    def get_current_questions_dict(self):
+        combo_item = self.item
+        questions_dict = {}
+        if combo_item == "HEART score":
+            questions_dict = self.heart_score_criteria
+        return questions_dict
+
+    def get_result_for_current_function(self):
         combo_item = self.item
         if combo_item == "CHADS score":
-            current_function = self.__CHADS_score_dictionary_method(self.response_dict)
+            result_for_current_function = self.__CHADS_score_dictionary_method(self.response_dict)
         elif combo_item == "CHADS-VASc score":
-            current_function = self.__CHADS_VASc_score_dictionary_method(self.response_dict)
+            result_for_current_function = self.__CHADS_VASc_score_dictionary_method(self.response_dict)
         elif combo_item == "Post-code algorithm":
-            current_function = self.__Post_Code_Cath_algorithm(self.response_dict)
-        return current_function
+            result_for_current_function = self.__Post_Code_Cath_algorithm(self.response_dict)
+        elif combo_item == "HAS-BLED score":
+            result_for_current_function = self.__HAS_BLED(self.response_dict)
+        elif combo_item == "HEART score":
+            print("debug RD is:", self.response_dict)
+            result_for_current_function = self.__heart_score(self.response_dict)
+        return result_for_current_function
+
+    def more_button_command(self):  # opens text file and prepares text to place in results label
+
+        item = self.item
+
+        if item == "CHADS score":
+            textfile = "CHADS_text"
+        elif item == "CHADS-VASc score":
+            textfile = "CHADSVASc_text"
+        elif item == "Post-code algorithm":
+            textfile = "Postcode_algorithm_text"
+        elif item == "HAS-BLED score":
+            textfile = "HAS_BLED_text"
+        elif item == "HEART score":
+            textfile = "HEART_score_text"
+
+        fh = open(textfile, 'r')
+
+        display_more_text = ""
+
+        for line in fh:
+            display_more_text = display_more_text + line
+
+        return display_more_text
 
 
     def __CHADS_score_dictionary_method(self, entries):
         chads_vasc_score = 0
-        ## entries = response_dict
 
         print("Entries are:", entries)  # debug
 
@@ -64,11 +128,8 @@ class CardiologyToolkit:
     #CHADSVASc calculator function
 
 
-    def __CHADS_VASc_score_dictionary_method(self, dictionary):
+    def __CHADS_VASc_score_dictionary_method(self, entries):
         chads_vasc_score = 0
-        entries = dictionary
-
-        #  print(entries)
 
         if entries['CHF'] == 1:
             chads_vasc_score += 1
@@ -128,10 +189,86 @@ class CardiologyToolkit:
         if len(response_list.get('True:')) > 1:
             print_recs = print_recs + """\n\n Recommendations: \n\n
             There are multiple unfavorable factors. \n
-            "Immediate coronary angiography may not yield significant benefits."""
+            Immediate coronary angiography may not yield significant benefits."""
 
             print("\n\n")
-            print("Recommendations: \n\nThere are multiple unfavorable factors. \n"
-            "Immediate coronary angiography may not yield significant benefits.")
+            print("""Recommendations: \n\nThere are multiple unfavorable factors. \n
+            Immediate coronary angiography may not yield significant benefits.""")
 
         return print_recs
+
+
+    # HAS-BLED function
+
+    def __HAS_BLED(self, entries):
+        has_bled_score = 0
+
+        if entries['HTN'] == 1:
+            has_bled_score += 1
+        if entries['Renal dz'] == 1:
+            has_bled_score += 1
+        if entries['Liver dz'] == 1:
+            has_bled_score += 1
+        elif entries['Stroke hx'] == 1:
+            has_bled_score += 1
+        if entries['Prior bleeding'] == 1:
+            has_bled_score += 1
+        if entries['Labile INR'] == 1:
+            has_bled_score += 2
+        if entries['Age > 65'] == 1:
+            has_bled_score += 1
+        if entries['High risk meds'] == 1:
+            has_bled_score += 1
+        if entries['Alcohol use'] == 1:
+            has_bled_score += 1
+
+        print("\n\nHAS-BLED score is: ", has_bled_score)
+        return has_bled_score
+
+
+    # HEART score function
+
+    def __heart_score(self, entries):
+        heart_score = 0
+
+        if entries['History'] == "Slightly suspicious":
+            heart_score += 0
+        elif entries['History'] == "Moderately suspicious":
+            heart_score += 1
+        elif entries['History'] == "Highly suspicious":
+            heart_score += 2
+
+        if entries['EKG'] == "No changes":
+            heart_score += 0
+        elif entries['EKG'] == "Non-specific repolarization abnormality":
+            heart_score += 1
+        elif entries['EKG'] == "Significant ST deviation":
+            heart_score += 2
+
+        if entries['Age'] == "<45":
+            heart_score += 0
+        elif entries['Age'] == "45-64":
+            heart_score += 1
+        elif entries['Age'] == ">=65":
+            heart_score += 2
+
+        if entries['Risk factors'] == "None":
+            heart_score += 0
+        elif entries['Risk factors'] == "1-2 risk factors":
+            heart_score += 1
+        elif entries['Risk factors'] == ">=3 risk factors":
+            heart_score += 2
+
+        if entries['Troponin'] == "Normal":
+            heart_score += 0
+        elif entries['Troponin'] == "1-3 x normal":
+            heart_score += 1
+        elif entries['Troponin'] == "> 3 x normal":
+            heart_score += 2
+
+
+        print("\n\nHEART score is: ", heart_score)
+        return heart_score
+
+
+
