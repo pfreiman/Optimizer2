@@ -2,21 +2,22 @@ from tkinter import *
 from tkinter import ttk
 
 from CardiologyToolkit import CardiologyToolkit
+
 my_tools = CardiologyToolkit()
 
 root = Tk()
 
 root.title("Data Entry Screen")
-root.geometry('1400x1400')
+root.geometry('1600x1600')
 root.resizable(True, True)
 
 upper_frame = Frame(root, width=800, height=300, bd=5, bg="aqua", relief="sunken")
 lower_frame = Frame(root, width=800, height=300, bd=5, bg="grey", relief="sunken")
 
-
 """ First function creates the checkboxes in upper frame"""
 
 checkboxes = {}
+
 
 def create_checkboxes(criteria_list):
     Cbcolumn = 3
@@ -41,8 +42,8 @@ def create_checkboxes(criteria_list):
 
 
 def checkboxesclear():
+    global checkboxes
     checkboxes = {}
-    return checkboxes
 
 
 """ Next function creates the dictionary of responses from checkboxes"""
@@ -75,30 +76,10 @@ key_list = []
 response_list = []
 response_dict = {}
 
-# alert_text = ""
-
-var0 = StringVar()
-var1 = StringVar()
-var2 = StringVar()
-var3 = StringVar()
-var4 = StringVar()
-var5 = StringVar()
-var6 = StringVar()
-var7 = StringVar()
-var8 = StringVar()
-var9 = StringVar()
-var10 = StringVar()
-var11 = StringVar()
-var12 = StringVar()
-var13 = StringVar()
-var14 = StringVar()
-var15 = StringVar()
-
-var_list = [var0, var1, var2, var3, var4, var5, var6, var7, var8, var9, var10, var11, var12, var13, var14,
-            var15]
-
+var_list = [StringVar() for i in range(0, 16)]
 
 """creates frame, labels and radiobutton choices from question:choices dictionary"""
+
 
 def create_radiobuttons(questions_dict):
     counter = 0  # counts row to display each question
@@ -106,7 +87,8 @@ def create_radiobuttons(questions_dict):
     questions_dict = my_tools.heart_score_criteria
 
     for question in questions_dict:  # sets up labels and builds key_list from initial dictionary
-        label_question = Label(lower_frame, text=question, font=("Arial", 20), fg="blue", bg="silver", height=2, pady=10)
+        label_question = Label(lower_frame, text=question, font=("Arial", 20), fg="blue", bg="silver", height=2,
+                               pady=10)
         label_question.grid(row=counter, column=0)
         key_list.append(question)
 
@@ -122,13 +104,15 @@ def create_radiobuttons(questions_dict):
         var = var_list[rowcount]
         for item in choices:
             new_buttons = Radiobutton(lower_frame,
-                                         text=item,
-                                         font=("Arial, 20"), fg="red",
-                                         padx=20, width=24, height=4,
-                                         variable=var,
-                                         indicatoron=0,
-                                         value=item)
-            new_buttons.grid(row=rowcount, column=idx+1)
+                                      text=item,
+                                      font=("Arial, 20"), fg="red",
+                                      bd=8,
+                                      selectcolor="blue",
+                                      padx=20, width=24, height=4,
+                                      variable=var,
+                                      indicatoron=0,
+                                      value=item)
+            new_buttons.grid(row=rowcount, column=idx + 1)
 
             idx += 1
         idx = 0  # resets column counter to zero
@@ -137,7 +121,7 @@ def create_radiobuttons(questions_dict):
 
 # create_radiobuttons()
 
-def create_dictionary_radiobuttons():   # creates the response dictionary from responses
+def create_dictionary_radiobuttons():  # creates the response dictionary from responses
 
     response_list = []
 
@@ -156,7 +140,6 @@ def create_dictionary_radiobuttons():   # creates the response dictionary from r
 
 
 def show_result_in_label():
-
     print("Selected combo item is:", my_tools.item)
 
     """ next section selects which frame(s) to display"""
@@ -168,12 +151,13 @@ def show_result_in_label():
     if my_tools.item in my_tools.set_of_numerical_input_questions:
         pass
 
-    my_tools.result_for_current_function = my_tools.get_result_for_current_function() # returns the result of current function
+    my_tools.result_for_current_function = my_tools.get_result_for_current_function()  # returns the result of current function
 
     result_label = Label(root, text=my_tools.result_text, font="helvetica, 12", bg='gray', fg='yellow',
                          relief='sunken')
     result_label.config(
-        text=str(my_tools.result_text) + "\n\n" + my_tools.item + " is: \n\n" + str(my_tools.result_for_current_function))
+        text=str(my_tools.result_text) + "\n\n" + my_tools.item + " is: \n\n" + str(
+            my_tools.result_for_current_function))
     result_label.grid(row=10, column=1, columnspan=3)
 
 
@@ -187,7 +171,6 @@ def combo_call_back_func(event):
 
     create_radiobuttons(my_tools.heart_score_criteria)
 
-
     """Next section chooses which frame to display"""
 
     if my_tools.item in my_tools.set_of_radiobutton_questions:
@@ -197,8 +180,8 @@ def combo_call_back_func(event):
         lower_frame.grid_forget()
         upper_frame.grid(row=1, column=0, columnspan=3, padx=20, pady=30)
 
-def open_new_window():
 
+def open_new_window():
     my_tools.result_for_current_function = my_tools.get_result_for_current_function()
 
     my_tools.showtext = str(my_tools.result_text) + "\n\n" + my_tools.item + " is:  \n\n" + str(
@@ -269,7 +252,7 @@ my_combo.bind("<<ComboboxSelected>>", combo_call_back_func)
 # result_button_checkboxes.grid(row=8, column=1, padx=10, pady=50, columnspan=1)
 
 result_button_radiobuttons = Button(text="Enter Selections", font="Arial, 24", fg="green", padx=20,
-                     command=show_result_in_label)
+                                    command=show_result_in_label)
 result_button_radiobuttons.grid(row=8, column=1, padx=10, pady=50, columnspan=3)
 
 open_button = Button(root, text="Open new Results window", font="Helvetica, 24", fg="green",
@@ -278,7 +261,6 @@ open_button.grid(row=18, column=1, columnspan=3, pady=50)
 
 quit_button = Button(root, text="Exit", font="Helvetica, 24", fg="blue", command=quit)
 quit_button.grid(row=22, pady=50, column=3)
-
 
 #  create a File menu
 
@@ -298,7 +280,6 @@ my_menu.add_cascade(label="Edit", menu=edit_menu)
 edit_menu.add_command(label="Cut", command=cut_command)
 edit_menu.add_command(label="Copy", command=copy_command)
 edit_menu.add_command(label="Paste", command=paste_command)
-
 
 root.mainloop()
 
