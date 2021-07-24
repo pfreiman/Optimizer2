@@ -1,12 +1,12 @@
-import tkinter as tk
+""" code to validate entries and screen for values with empty strings"""
 
-root = tk.Tk()
 
-root.title("Data Entry Screen")
-root.geometry('1400x1400')
-root.resizable(True, True)
-
-error_message = "Not a valid entry.  Enter a number."
+def is_number(string):
+    try:
+        float(string)
+        return True
+    except ValueError:
+        return False
 
 
 def validate_entry():
@@ -22,15 +22,23 @@ def validate_entry():
         my_label.config(text="Not a valid entry.  Enter a number.")
 
 
-my_entry = tk.Entry(root)
-my_entry.pack()
+# import tkinter as tk
+#
+# root = tk.Tk()
+#
+# root.title("Data Entry Screen")
+# root.geometry('1400x1400')
+# root.resizable(True, True)
 
-my_button = tk.Button(root, text='Validate', command=validate_entry)
-my_button.pack()
-
-my_label = tk.Label(root, text=error_message)
-my_label.pack()
-
-my_input = my_entry.get()
-
-tk.mainloop()
+# my_entry = tk.Entry(root)
+# my_entry.pack()
+#
+# # my_button = tk.Button(root, text='Validate', command=validate_entry)
+# my_button.pack()
+#
+# my_label = tk.Label(root, text=error_message)
+# my_label.pack()
+#
+# my_input = my_entry.get()
+#
+# tk.mainloop()

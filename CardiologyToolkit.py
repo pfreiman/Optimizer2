@@ -7,17 +7,17 @@ with this as the "brains".
 class CardiologyToolkit:
     def __init__(self):
         self.item = ""
-        self.response_dict = {}
+        self.response_dict_checkboxes = {}
+        self.response_dict_radiobuttons = {}
+        self.response_dict_numerical = {}
         self.questions_dict = {}
-        self.result_text = ""
         self.result_for_current_function = ""
-        self.showtext = ""
-        self.display_text = ""
-        self.display_more_text = ""
+        self.result_text = ""
+        self.display_long_text = ""  #text for long display on results window
 
         self.set_of_checkbox_questions = set(["CHADS score", "CHADS-VASc score", "Post-code algorithm", "HAS-BLED score"])
         self.set_of_radiobutton_questions = set(["HEART score"])
-        self.set_of_numerical_input_questions = set()
+        self.set_of_numerical_input_questions = set(["QTc interval"])
 
         self.heart_score_criteria = {
             'History': ('Slightly suspicious', 'Moderately suspicious', 'Highly suspicious'),
@@ -25,21 +25,16 @@ class CardiologyToolkit:
             'Age': ('<45', '45-64', '>=65'),
             'Risk factors': ('None', '1-2 risk factors', '>=3 risk factors'),
             'Troponin': ('Normal', '1-3 x normal', '> 3 x normal')
-        }
+            }
 
         self.combobox_options_list = ["", "CHADS score", "CHADS-VASc score", "Post-code algorithm", "HAS-BLED score",
-                                      "HEART score"]
+                                      "HEART score", "QTc interval"]
+
         self.__cl_CHADS = ['CHF', 'HTN', 'AGE > 75', 'Diabetes', 'Stroke_hx']
         self.__cl_CHADS_VASc = ['CHF', 'HTN', 'AGE > 75', 'Diabetes', 'Stroke_hx', 'Vascular_dz', 'AGE > 65', 'Female_gender']
         self.__cl_post_arrest = ['Unwitnessed', 'Ongoing CPR', 'ROSC_> 30 minutes', 'pH < 7.2', 'Non-cardiac cause', 'Initial rhythm non-VF', 'lactate > 7', 'No bystander CPR', 'Age > 85', 'ESRD']
         self.__cl_HAS_BLED = ['HTN', 'Renal dz', 'Liver dz', 'Stroke hx', 'Prior bleeding', 'Labile INR', 'Age > 65', 'High risk meds', 'Alcohol use']
-
-
-
-
-    # def get_list(self):   ## used in radiobuttons program
-    #     current_list = self.__cl_post_arrest
-    #     return current_list
+        self.__cl_QTc = ["Enter QT interval (in msec)", "Enter RR' interval (in msec)"]
 
 
     def get_current_criteria_list(self):
@@ -52,6 +47,8 @@ class CardiologyToolkit:
             criteria_list = self.__cl_post_arrest
         elif combo_item == "HAS-BLED score":
             criteria_list = self.__cl_HAS_BLED
+        elif combo_item == "QTc interval":
+            criteria_list = self.__cl_QTc
         else:
             criteria_list = []
         return criteria_list
@@ -65,20 +62,23 @@ class CardiologyToolkit:
 
     def get_result_for_current_function(self):
         combo_item = self.item
+
         if combo_item == "CHADS score":
-            result_for_current_function = self.__CHADS_score_dictionary_method(self.response_dict)
+            result_for_current_function = self.__CHADS_score_dictionary_method(self.response_dict_checkboxes)
         elif combo_item == "CHADS-VASc score":
-            result_for_current_function = self.__CHADS_VASc_score_dictionary_method(self.response_dict)
+            result_for_current_function = self.__CHADS_VASc_score_dictionary_method(self.response_dict_checkboxes)
         elif combo_item == "Post-code algorithm":
-            result_for_current_function = self.__Post_Code_Cath_algorithm(self.response_dict)
+            result_for_current_function = self.__Post_Code_Cath_algorithm(self.response_dict_checkboxes)
         elif combo_item == "HAS-BLED score":
-            result_for_current_function = self.__HAS_BLED(self.response_dict)
+            result_for_current_function = self.__HAS_BLED(self.response_dict_checkboxes)
         elif combo_item == "HEART score":
-            print("debug RD is:", self.response_dict)
-            result_for_current_function = self.__heart_score(self.response_dict)
+            result_for_current_function = self.__heart_score(self.response_dict_radiobuttons)
+        elif combo_item == "QTc interval":
+            result_for_current_function = self.__QTc_calculator(self.response_dict_numerical)
+
         return result_for_current_function
 
-    def more_button_command(self):  # opens text file and prepares text to place in results label
+    def long_button_command(self):  # opens text file and prepares text to place in results label
 
         item = self.item
 
@@ -95,18 +95,27 @@ class CardiologyToolkit:
 
         fh = open(textfile, 'r')
 
-        display_more_text = ""
+        display_long_text = ""
 
         for line in fh:
-            display_more_text = display_more_text + line
+            display_long_text = display_long_text + line
 
-        return display_more_text
+        return display_long_text
+
+    def open_details_window(self):
+
+        win_details = self.Toplevel(win_results)
+        win_details.self.title("Additional details")
+        win_details.self.geometry('800x800')
+        win_details.self.resizable(True, True)
+
+        win_details.self.mainloop()
 
 
     def __CHADS_score_dictionary_method(self, entries):
         chads_vasc_score = 0
 
-        print("Entries are:", entries)  # debug
+        print("CHADS Entries are:", entries)
 
         if entries['CHF'] == 1:
             chads_vasc_score += 1
@@ -125,7 +134,7 @@ class CardiologyToolkit:
 
 
 
-    #CHADSVASc calculator function
+     # CHADSVASc calculator function
 
 
     def __CHADS_VASc_score_dictionary_method(self, entries):
@@ -171,9 +180,6 @@ class CardiologyToolkit:
             else:
                 null_list.append(key)
 
-        # print("True list:", true_list)
-        # print("False list:", false_list)
-        # print("Null list:", null_list)
         response_list = {"True:": true_list, "False:": false_list, "Null:": null_list}
 
         print_recs = ""
@@ -269,6 +275,13 @@ class CardiologyToolkit:
 
         print("\n\nHEART score is: ", heart_score)
         return heart_score
+
+    # QTc calculator function
+
+    def __QTc_calculator(self, entries):
+        qtc_interval = (entries["Enter QT interval (in msec)"] / ((entries["Enter RR' interval (in msec)"]/1000) ** (1/2)))
+        print("QTc is:", qtc_interval)
+        return qtc_interval
 
 
 
