@@ -2,4 +2,4 @@
 
 ## How to Run:
 
-1. Run `python Score_calc_1.py`.
+1. Run `python Working_copy.py`.
