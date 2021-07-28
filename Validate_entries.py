@@ -1,4 +1,5 @@
-""" code to validate entries and screen for values with empty strings"""
+""" code to validate entries """
+from tkinter import messagebox
 
 
 def is_number(string):
@@ -9,36 +10,41 @@ def is_number(string):
         return False
 
 
-def validate_entry():
-    print(my_entry.get())
-    my_input = my_entry.get()
-    print(my_input)
-    print(type(my_input))
-    try:
-        my_input = float(my_input)
-        my_label.config(text="Valid entry")
-    except:
-        print("input is not a well-formed number")
-        my_label.config(text="Not a valid entry.  Enter a number.")
+""" code to validate numerical entries"""
+
+my_entries = [4, 6, 7]
+my_entries2 = ['abc', 'def', 'ghi']
 
 
-# import tkinter as tk
-#
-# root = tk.Tk()
-#
-# root.title("Data Entry Screen")
-# root.geometry('1400x1400')
-# root.resizable(True, True)
+def validate_numerical_entries(my_entries):
+    for entries in my_entries:
+        if not is_number(entries):
+            print("At least one entry is not a number.")
+        return
 
-# my_entry = tk.Entry(root)
-# my_entry.pack()
-#
-# # my_button = tk.Button(root, text='Validate', command=validate_entry)
-# my_button.pack()
-#
-# my_label = tk.Label(root, text=error_message)
-# my_label.pack()
-#
-# my_input = my_entry.get()
-#
-# tk.mainloop()
+
+# validate_numerical_entries(my_entries2)
+
+
+""" validate dictionary entries and screen for values with empty strings"""
+
+sample_dictionary = {'First': 1, 'Second': "", 'Third': (3, 4, 5), 'Fourth': "test string"}
+sample_dictionary2 = {}
+
+
+def validate_dictionary(dict):  # invalidates entry if dictionary empty or values missing
+    error_value = False
+    error_dict = False
+    if dict == {}:  # checks for empty dictionary
+        print("Error.  At least one key entry is missing")
+        messagebox.showerror(message="At least one key entry is missing.")
+    for v in dict.values():  # checks for missing values
+        if v == "" or None:
+            error_value = True
+            print("Error.  At least one value entry is missing.")
+            messagebox.showerror(message="At least one value entry is missing.")
+    if dict == {} or error_value == True:
+        error_dict = True
+    return error_dict
+
+# validate_dictionary(sample_dictionary2)

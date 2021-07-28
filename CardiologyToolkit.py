@@ -4,6 +4,7 @@ Think of this like a tool box we are giving the main file, which builds the user
 with this as the "brains".
 """
 
+
 class CardiologyToolkit:
     def __init__(self):
         self.item = ""
@@ -13,11 +14,12 @@ class CardiologyToolkit:
         self.questions_dict = {}
         self.result_for_current_function = ""
         self.result_text = ""
-        self.display_long_text = ""  #text for long display on results window
+        self.display_long_text = ""  # text for long display on results window
 
-        self.set_of_checkbox_questions = set(["CHADS score", "CHADS-VASc score", "Post-code algorithm", "HAS-BLED score"])
-        self.set_of_radiobutton_questions = set(["HEART score"])
-        self.set_of_numerical_input_questions = set(["QTc interval"])
+        self.set_of_checkbox_questions = {"CHADS score", "CHADS-VASc score", "Post-code algorithm", "HAS-BLED score",
+                                          "Pre-op evaluation"}
+        self.set_of_radiobutton_questions = {"HEART score", "Pre-op evaluation"}
+        self.set_of_numerical_input_questions = {"QTc interval"}
 
         self.heart_score_criteria = {
             'History': ('Slightly suspicious', 'Moderately suspicious', 'Highly suspicious'),
@@ -25,17 +27,24 @@ class CardiologyToolkit:
             'Age': ('<45', '45-64', '>=65'),
             'Risk factors': ('None', '1-2 risk factors', '>=3 risk factors'),
             'Troponin': ('Normal', '1-3 x normal', '> 3 x normal')
-            }
+        }
 
-        self.combobox_options_list = ["", "CHADS score", "CHADS-VASc score", "Post-code algorithm", "HAS-BLED score",
-                                      "HEART score", "QTc interval"]
+        self.combobox_scores_options_list = ["", "CHADS score", "CHADS-VASc score", "HAS-BLED score",
+                                             "HEART score", "QTc interval"]
+        self.combobox_clinical_scenarios_options_list = ["", "Pre-op evaluation", "Post-code algorithm"]
 
         self.__cl_CHADS = ['CHF', 'HTN', 'AGE > 75', 'Diabetes', 'Stroke_hx']
-        self.__cl_CHADS_VASc = ['CHF', 'HTN', 'AGE > 75', 'Diabetes', 'Stroke_hx', 'Vascular_dz', 'AGE > 65', 'Female_gender']
-        self.__cl_post_arrest = ['Unwitnessed', 'Ongoing CPR', 'ROSC_> 30 minutes', 'pH < 7.2', 'Non-cardiac cause', 'Initial rhythm non-VF', 'lactate > 7', 'No bystander CPR', 'Age > 85', 'ESRD']
-        self.__cl_HAS_BLED = ['HTN', 'Renal dz', 'Liver dz', 'Stroke hx', 'Prior bleeding', 'Labile INR', 'Age > 65', 'High risk meds', 'Alcohol use']
+        self.__cl_CHADS_VASc = ['CHF', 'HTN', 'AGE > 75', 'Diabetes', 'Stroke_hx', 'Vascular_dz', 'AGE > 65',
+                                'Female_gender']
+        self.__cl_post_arrest = ['Unwitnessed', 'Ongoing CPR', 'ROSC_> 30 minutes', 'pH < 7.2', 'Non-cardiac cause',
+                                 'Initial rhythm non-VF', 'lactate > 7', 'No bystander CPR', 'Age > 85', 'ESRD']
+        self.__cl_HAS_BLED = ['HTN', 'Renal dz', 'Liver dz', 'Stroke hx', 'Prior bleeding', 'Labile INR', 'Age > 65',
+                              'High risk meds', 'Alcohol use']
         self.__cl_QTc = ["Enter QT interval (in msec)", "Enter RR' interval (in msec)"]
-
+        self.__cl_Pre_op_checkboxes = ['Is this emergency surgery?', 'Acute coronary syndrome?']
+        self.cl_Pre_op_criteria_radiobuttons = {
+            "Surgical risk": ('Low risk', 'Elevated risk'),
+            "Functional capacity": (' < 4 METS or unknown ', ' 4-10 METS ', ' > 10 METS ')}
 
     def get_current_criteria_list(self):
         combo_item = self.item
@@ -49,6 +58,8 @@ class CardiologyToolkit:
             criteria_list = self.__cl_HAS_BLED
         elif combo_item == "QTc interval":
             criteria_list = self.__cl_QTc
+        elif combo_item == "Pre-op evaluation":
+            criteria_list = self.__cl_Pre_op_checkboxes
         else:
             criteria_list = []
         return criteria_list
@@ -58,6 +69,8 @@ class CardiologyToolkit:
         questions_dict = {}
         if combo_item == "HEART score":
             questions_dict = self.heart_score_criteria
+        elif combo_item == "Pre-op evaluation":
+            questions_dict = self.cl_Pre_op_criteria_radiobuttons
         return questions_dict
 
     def get_result_for_current_function(self):
@@ -75,6 +88,9 @@ class CardiologyToolkit:
             result_for_current_function = self.__heart_score(self.response_dict_radiobuttons)
         elif combo_item == "QTc interval":
             result_for_current_function = self.__QTc_calculator(self.response_dict_numerical)
+        elif combo_item == "Pre-op evaluation":
+            result_for_current_function = self.__pre_op_evaluation(self.response_dict_checkboxes,
+                                                                   self.response_dict_radiobuttons)
 
         return result_for_current_function
 
@@ -111,7 +127,6 @@ class CardiologyToolkit:
 
         win_details.self.mainloop()
 
-
     def __CHADS_score_dictionary_method(self, entries):
         chads_vasc_score = 0
 
@@ -128,14 +143,10 @@ class CardiologyToolkit:
         if entries['Stroke_hx'] == 1:
             chads_vasc_score += 2
 
-
         print("\n\nCHADS score is: ", chads_vasc_score)
         return chads_vasc_score
 
-
-
-     # CHADSVASc calculator function
-
+    # CHADSVASc calculator function
 
     def __CHADS_VASc_score_dictionary_method(self, entries):
         chads_vasc_score = 0
@@ -160,10 +171,7 @@ class CardiologyToolkit:
         print("\n\nCHADS-VASc score is: ", chads_vasc_score)
         return chads_vasc_score
 
-
-
     """Post-code algorithm function"""
-
 
     def __Post_Code_Cath_algorithm(self, entries):
 
@@ -187,7 +195,6 @@ class CardiologyToolkit:
         print_recs = print_recs + "\nFavorable criteria include: " + str(response_list.get('False:'))
         print_recs = print_recs + "\nInvalid or absent factors:" + str(response_list.get('Null:'))
 
-
         print("\n\nUnfavorable criteria include: ", response_list.get('True:'))
         print("\nFavorable criteria include: ", response_list.get('False:'))
         print("\nInvalid or absent factors:", response_list.get('Null:'))
@@ -202,7 +209,6 @@ class CardiologyToolkit:
             Immediate coronary angiography may not yield significant benefits.""")
 
         return print_recs
-
 
     # HAS-BLED function
 
@@ -230,7 +236,6 @@ class CardiologyToolkit:
 
         print("\n\nHAS-BLED score is: ", has_bled_score)
         return has_bled_score
-
 
     # HEART score function
 
@@ -272,16 +277,38 @@ class CardiologyToolkit:
         elif entries['Troponin'] == "> 3 x normal":
             heart_score += 2
 
-
         print("\n\nHEART score is: ", heart_score)
         return heart_score
 
     # QTc calculator function
 
     def __QTc_calculator(self, entries):
-        qtc_interval = (entries["Enter QT interval (in msec)"] / ((entries["Enter RR' interval (in msec)"]/1000) ** (1/2)))
+        qtc_interval = (entries["Enter QT interval (in msec)"] / (
+                    (entries["Enter RR' interval (in msec)"] / 1000) ** (1 / 2)))
+        qtc_interval = round(qtc_interval)
         print("QTc is:", qtc_interval)
         return qtc_interval
 
+    def __pre_op_evaluation(self, entries_checkboxes, entries_radiobuttons):
+        print("RD cb is: ", entries_checkboxes)
+        print("RD rb is: ", entries_radiobuttons)
 
-
+        if entries_checkboxes['Is this emergency surgery?'] == 1:
+            recommendation = "Recommendation:  Clinical risk stratification and proceed to surgery."
+            return recommendation
+        elif entries_checkboxes['Acute coronary syndrome?'] == 1:
+            recommendation = "Recommendation:  Evaluate and treat according to GDMT."
+            return recommendation
+        elif entries_radiobuttons["Surgical risk"] == "Low":
+            recommendation = "Recommendation:  No further testing (class III).  Proceed to surgery."
+            return recommendation
+        elif entries_radiobuttons["Surgical risk"] == "Elevated risk":
+            if entries_radiobuttons["Functional capacity"] == ' < 4 METS or unknown ':
+                recommendation = "Recommendation:  If further testing will impact decision making " \
+                                 "or post-operative care, proceed to pharmacologic nuclear stress " \
+                                 "testing."
+                return recommendation
+        elif entries_radiobuttons["Functional capacity"] == " 4-10 METS " or \
+                entries_radiobuttons["Functional capacity"] == " >10 METS ":
+            recommendation = "Recommendation:  No further testing.  Proceed to surgery."
+            return recommendation
