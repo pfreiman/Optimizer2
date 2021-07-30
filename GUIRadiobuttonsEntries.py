@@ -23,10 +23,10 @@ class GUIShell:
 
 
 
-        var = tk.StringVar()
+        # var = tk.StringVar()
 
 
-        def show_choice(self):   # function to get value of checked radiobutton
+        def show_choice():   # function to get value of checked radiobutton
 
             print("here is the value stored in var:", var.get())
             print(" debug---- WHY WON''T THIS PRINT THE VALUE OF VAR????")
@@ -55,17 +55,21 @@ class GUIShell:
             """ make the radiobutton entry fields for each frame"""
             """ this is a nested loop to create the radiobuttons"""
 
-            var1 = tk.StringVar()
-            var2 = tk.StringVar()
-            var3 = tk.StringVar()
-            var4 = tk.StringVar()
-            var5 = tk.StringVar()
+            # var1 = tk.StringVar()
+            # var2 = tk.StringVar()
+            # var3 = tk.StringVar()
+            # var4 = tk.StringVar()
+            # var5 = tk.StringVar()
+            #
+            # temp = [var1, var2, var3, var4, var5]  # list of temp var variables to use for radiobuttons
 
-            temp = [var1, var2, var3, var4, var5]  # list of temp var variables to use for radiobuttons
+
 
             idx = 0  # sets index of columns(response options) to zero
+            #
+            # var = temp[idx]  # sets var to current iteration
 
-            var = temp[idx]  # sets var to current iteration
+            var = tk.StringVar()
 
             print("\n\n current var is:", var)  # debug
 
@@ -77,9 +81,10 @@ class GUIShell:
                                              padx=20, width=30,
                                              variable=var,
                                              indicatoron=0,
-                                             command=show_choice(self),
+                                             command=show_choice,
                                              value=item)
                 new_buttons.grid(row=1, column=idx)
+
 
                 idx += 1
 

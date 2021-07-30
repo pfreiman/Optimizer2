@@ -17,7 +17,7 @@ class CardiologyToolkit:
         self.display_long_text = ""  # text for long display on results window
 
         self.set_of_checkbox_questions = {"CHADS score", "CHADS-VASc score", "Post-code algorithm", "HAS-BLED score",
-                                          "Pre-op evaluation", "Sgarbossa criteria"}
+                                          "Pre-op evaluation", "Sgarbossa criteria", "TIMI score ACS"}
         self.set_of_radiobutton_questions = {"HEART score", "Pre-op evaluation"}
         self.set_of_numerical_input_questions = {"QTc interval"}
 
@@ -30,7 +30,7 @@ class CardiologyToolkit:
         }
 
         self.combobox_scores_options_list = ["", "CHADS score", "CHADS-VASc score", "HAS-BLED score",
-                                             "HEART score", "QTc interval", "Sgarbossa criteria"]
+                                             "HEART score", "QTc interval", "Sgarbossa criteria", "TIMI score ACS"]
         self.combobox_clinical_scenarios_options_list = ["", "Pre-op evaluation", "Post-code algorithm"]
 
         self.__cl_CHADS = ['CHF', 'HTN', 'AGE > 75', 'Diabetes', 'Stroke_hx']
@@ -47,6 +47,10 @@ class CardiologyToolkit:
             "Functional capacity": (' < 4 METS or unknown ', ' 4-10 METS ', ' > 10 METS ')}
         self.__cl_Sgarbossa_criteria = ["Concordant ST elevation", "Concordant ST depression in V1-V3",
                                         "Proportionally excessive discordant ST elevation in >= one lead"]
+        self.__cl_TIMI_ACS = ["Age > 65", "Used aspirin within the last week", "2 or more angina episodes in last 24 hrs",
+                              "Elevated cardiac biomarkers", "ST segment deviation on EKG",
+                              "Known coronary artery disease", "3 or more risk factors"]
+
 
     def get_current_criteria_list(self):
         combo_item = self.item
@@ -64,6 +68,8 @@ class CardiologyToolkit:
             criteria_list = self.__cl_Pre_op_checkboxes
         elif combo_item == "Sgarbossa criteria":
             criteria_list = self.__cl_Sgarbossa_criteria
+        elif combo_item == "TIMI score ACS":
+            criteria_list = self.__cl_TIMI_ACS
         else:
             criteria_list = []
         return criteria_list
@@ -97,6 +103,8 @@ class CardiologyToolkit:
                                                                    self.response_dict_radiobuttons)
         elif combo_item == "Sgarbossa criteria":
             result_for_current_function = self.__smith_modified_sgarbossa_criteria(self.response_dict_checkboxes)
+        elif combo_item == "TIMI score ACS":
+            result_for_current_function = self.__TIMI_score_ACS(self.response_dict_checkboxes)
         print("result:", result_for_current_function)
         return result_for_current_function
 
@@ -114,6 +122,8 @@ class CardiologyToolkit:
             textfile = "HAS_BLED_text"
         elif item == "HEART score":
             textfile = "HEART_score_text"
+        elif item == "TIMI score ACS":
+            textfile = "TIMI_score_ACS_text_long"
 
         fh = open(textfile, 'r')
 
@@ -327,3 +337,10 @@ class CardiologyToolkit:
             sgarbossa_criteria = "Smith modified Sgarbossa criteria are not met.  Acute MI is not suspected."
         print(sgarbossa_criteria)
         return sgarbossa_criteria
+
+    def __TIMI_score_ACS(self, entries):
+        TIMI_score = 0
+        for key in entries:
+            TIMI_score += entries[key]
+        print(TIMI_score)
+        return TIMI_score
