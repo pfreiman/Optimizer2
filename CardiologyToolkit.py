@@ -19,7 +19,7 @@ class CardiologyToolkit:
         self.set_of_checkbox_questions = {"CHADS score", "CHADS-VASc score", "Post-code algorithm", "HAS-BLED score",
                                           "Pre-op evaluation", "Sgarbossa criteria", "TIMI score ACS"}
         self.set_of_radiobutton_questions = {"HEART score", "Pre-op evaluation"}
-        self.set_of_numerical_input_questions = {"QTc interval"}
+        self.set_of_numerical_input_questions = {"QTc interval", "A-a gradient"}
 
         self.heart_score_criteria = {
             'History': ('Slightly suspicious', 'Moderately suspicious', 'Highly suspicious'),
@@ -30,7 +30,8 @@ class CardiologyToolkit:
         }
 
         self.combobox_scores_options_list = ["", "CHADS score", "CHADS-VASc score", "HAS-BLED score",
-                                             "HEART score", "QTc interval", "Sgarbossa criteria", "TIMI score ACS"]
+                                             "HEART score", "QTc interval", "Sgarbossa criteria", "TIMI score ACS",
+                                             "A-a gradient"]
         self.combobox_clinical_scenarios_options_list = ["", "Pre-op evaluation", "Post-code algorithm"]
 
         self.__cl_CHADS = ['CHF', 'HTN', 'AGE > 75', 'Diabetes', 'Stroke_hx']
@@ -50,6 +51,7 @@ class CardiologyToolkit:
         self.__cl_TIMI_ACS = ["Age > 65", "Used aspirin within the last week", "2 or more angina episodes in last 24 hrs",
                               "Elevated cardiac biomarkers", "ST segment deviation on EKG",
                               "Known coronary artery disease", "3 or more risk factors"]
+        self.__cl_A_a_gradient = ["Age:", "PaO2:", "PaCO2:", "FiO2:"]
 
 
     def get_current_criteria_list(self):
@@ -70,6 +72,8 @@ class CardiologyToolkit:
             criteria_list = self.__cl_Sgarbossa_criteria
         elif combo_item == "TIMI score ACS":
             criteria_list = self.__cl_TIMI_ACS
+        elif combo_item == "A-a gradient":
+            criteria_list = self.__cl_A_a_gradient
         else:
             criteria_list = []
         return criteria_list
@@ -105,6 +109,8 @@ class CardiologyToolkit:
             result_for_current_function = self.__smith_modified_sgarbossa_criteria(self.response_dict_checkboxes)
         elif combo_item == "TIMI score ACS":
             result_for_current_function = self.__TIMI_score_ACS(self.response_dict_checkboxes)
+        elif combo_item == "A-a gradient":
+            result_for_current_function = self.__A_a_gradient(self.response_dict_numerical)
         print("result:", result_for_current_function)
         return result_for_current_function
 
@@ -124,6 +130,8 @@ class CardiologyToolkit:
             textfile = "HEART_score_text"
         elif item == "TIMI score ACS":
             textfile = "TIMI_score_ACS_text_long"
+        elif item == "A-a gradient":
+            textfile = "A_a_gradient_text_long"
 
         fh = open(textfile, 'r')
 
@@ -344,3 +352,15 @@ class CardiologyToolkit:
             TIMI_score += entries[key]
         print(TIMI_score)
         return TIMI_score
+
+    def __A_a_gradient(self, entries):
+        calc_A_a_gradient = float
+        expected_A_a_gradient = (float(entries['Age:']) + 10)/4
+        calc_PAO2 = ((713 * float(entries['FiO2:'])) - ((float(entries['PaCO2:'])/0.8)))
+        calc_A_a_gradient = calc_PAO2 - (float(entries['PaO2:']))
+        calc_A_a_gradient = round(calc_A_a_gradient, 1)
+        print("Calculated A-a gradient = ", str(calc_A_a_gradient))
+        print("Expected A-a gradient:", str(expected_A_a_gradient))
+        summary = "Calculated A-a gradient = " + str(calc_A_a_gradient) + \
+                       "\n\n Expected A-a gradient = " +  str(expected_A_a_gradient)
+        return summary

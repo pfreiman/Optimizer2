@@ -175,11 +175,7 @@ def get_responses_numerical():
 
     for entries in my_entries:
 
-        # if not is_number(entries.get()):
-        #     lbl_show.config(text="Some entries are not numbers.  Re-enter values and try again")
-        #     break
-        print("? is it a number?", is_number(entries.get()))
-
+        # validate entries
         if not is_number(entries.get()):
             messagebox.showinfo(title="Entry error", message="Some entries are not numbers.  "
                                                              "Re-enter values and try again.")
@@ -252,7 +248,6 @@ def combo_call_back_func(event):
     # This section prevents user from multiple topic choices for each program execution
 
     validate_multiple_topics(my_tools.item)
-    print("validated")
 
     if my_tools.item in my_tools.combobox_scores_options_list:
         my_tools.item = combo_scores_and_calculators.get()
@@ -300,6 +295,9 @@ def combo_call_back_func(event):
     elif my_tools.item == "TIMI score ACS":
         lbl_intro.config(text="TIMI score for ACS is used to predict risk of adverse outcomes "
                               "in 14 days.")
+    elif my_tools.item == "A-a gradient":
+        lbl_intro.config(text="The alveolar-arterial oxygen gradient is used to evaluate oxygen "
+                              "exchange at the alveolar level and assess causes of hypoxemia.")
 
     lbl_intro.grid(row=2, column=1, columnspan=2, pady=30)
 
@@ -443,4 +441,3 @@ my_menu.add_cascade(label="Differential diagnoses", menu=diff_dx_menu)
 diff_dx_menu.add_command(label="Open DDx window", command=open_differential_diagnosis_frame)
 
 root.mainloop()
-
