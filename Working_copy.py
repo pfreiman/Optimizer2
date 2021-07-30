@@ -294,6 +294,9 @@ def combo_call_back_func(event):
     elif my_tools.item == "QTc interval":
         lbl_intro.config(text="The corrected QT interval (QTc) is useful in evaluating the EKG "
                               "and making decisions about specific therapies.")
+    elif my_tools.item == "Sgarbossa criteria":
+        lbl_intro.config(text="Sgarbossa criteria are used to evaluate for ekg changes indicating "
+                              "acute MI in patients with preexisting LBBB or ventricular pacemaker")
 
     lbl_intro.grid(row=2, column=1, columnspan=2, pady=30)
 

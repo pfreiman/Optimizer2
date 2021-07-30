@@ -17,7 +17,7 @@ class CardiologyToolkit:
         self.display_long_text = ""  # text for long display on results window
 
         self.set_of_checkbox_questions = {"CHADS score", "CHADS-VASc score", "Post-code algorithm", "HAS-BLED score",
-                                          "Pre-op evaluation"}
+                                          "Pre-op evaluation", "Sgarbossa criteria"}
         self.set_of_radiobutton_questions = {"HEART score", "Pre-op evaluation"}
         self.set_of_numerical_input_questions = {"QTc interval"}
 
@@ -30,7 +30,7 @@ class CardiologyToolkit:
         }
 
         self.combobox_scores_options_list = ["", "CHADS score", "CHADS-VASc score", "HAS-BLED score",
-                                             "HEART score", "QTc interval"]
+                                             "HEART score", "QTc interval", "Sgarbossa criteria"]
         self.combobox_clinical_scenarios_options_list = ["", "Pre-op evaluation", "Post-code algorithm"]
 
         self.__cl_CHADS = ['CHF', 'HTN', 'AGE > 75', 'Diabetes', 'Stroke_hx']
@@ -45,6 +45,8 @@ class CardiologyToolkit:
         self.cl_Pre_op_criteria_radiobuttons = {
             "Surgical risk": ('Low risk', 'Elevated risk'),
             "Functional capacity": (' < 4 METS or unknown ', ' 4-10 METS ', ' > 10 METS ')}
+        self.__cl_Sgarbossa_criteria = ["Concordant ST elevation", "Concordant ST depression in V1-V3",
+                                        "Proportionally excessive discordant ST elevation in >= one lead"]
 
     def get_current_criteria_list(self):
         combo_item = self.item
@@ -60,6 +62,8 @@ class CardiologyToolkit:
             criteria_list = self.__cl_QTc
         elif combo_item == "Pre-op evaluation":
             criteria_list = self.__cl_Pre_op_checkboxes
+        elif combo_item == "Sgarbossa criteria":
+            criteria_list = self.__cl_Sgarbossa_criteria
         else:
             criteria_list = []
         return criteria_list
@@ -91,7 +95,9 @@ class CardiologyToolkit:
         elif combo_item == "Pre-op evaluation":
             result_for_current_function = self.__pre_op_evaluation(self.response_dict_checkboxes,
                                                                    self.response_dict_radiobuttons)
-
+        elif combo_item == "Sgarbossa criteria":
+            result_for_current_function = self.__smith_modified_sgarbossa_criteria(self.response_dict_checkboxes)
+        print("result:", result_for_current_function)
         return result_for_current_function
 
     def long_button_command(self):  # opens text file and prepares text to place in results label
@@ -312,3 +318,12 @@ class CardiologyToolkit:
                 entries_radiobuttons["Functional capacity"] == " >10 METS ":
             recommendation = "Recommendation:  No further testing.  Proceed to surgery."
             return recommendation
+
+    def __smith_modified_sgarbossa_criteria(self, entries):
+
+        if entries['Concordant ST elevation'] == 1 or entries['Concordant ST depression in V1-V3'] ==  1 or entries['Proportionally excessive discordant ST elevation in >= one lead'] == 1:
+            sgarbossa_criteria = "Smith modified Sgarbossa criteria are positive.  Acute MI is suspected."
+        else:
+            sgarbossa_criteria = "Smith modified Sgarbossa criteria are not met.  Acute MI is not suspected."
+        print(sgarbossa_criteria)
+        return sgarbossa_criteria
