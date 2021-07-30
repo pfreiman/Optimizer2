@@ -1,5 +1,7 @@
 """ code to validate entries """
 from tkinter import messagebox
+from CardiologyToolkit import CardiologyToolkit
+my_tools = CardiologyToolkit()
 
 
 def is_number(string):
@@ -48,3 +50,9 @@ def validate_dictionary(dict):  # invalidates entry if dictionary empty or value
     return error_dict
 
 # validate_dictionary(sample_dictionary2)
+
+def validate_multiple_topics(clicked_entry):
+    print("my tools.item is:", my_tools.item)
+    if clicked_entry != "":
+        messagebox.showerror("Error", "May only run one query at at time.  Start over and enter new topic.")
+        exit()
